@@ -222,6 +222,8 @@ save(api_url, file="REDCap_url.RData")
 ## save out whole environment:
 save.image(file="QSU_RWorkshop_Session2.RData")
 
+## if you want to load an RData environment:
+# load(file="QSU_RWorkshop_Session2.RData")
 ```
 
 ## Getting to know your data
@@ -262,6 +264,8 @@ str(zips_proj)
 length(unique(zips_proj$Name))
 length(unique(zips_proj$Team))
 
+dup = zips_proj[which(zips_proj$Name %in% zips_proj$Name[duplicated(zips_proj$Name)])]
+
 ```
 
 ## Cleaning/Manipulating data
@@ -272,6 +276,12 @@ table(zips_proj$Team, useNA = "ifany")
 
 zips_proj$Team[which(zips_proj$Team=="")] <- NA
 table(zips_proj$Team, useNA = "ifany")
+
+
+## when to use which for subsetting:
+## usually it doesn't make a difference, but if your condition is NA and you don't use which it will return XX rows of all NA values for however NA's are in your subset condition:
+test <- zips_proj[zips_proj$Team=="ARI",]
+test2 <- zips_proj[which(zips_proj$Team=="ARI"),]
 
 ```
 ### fixing/re-grouping categorical vars
@@ -500,6 +510,7 @@ glm(Win ~ PA.num + H.num + SO.num, data=df_mod, family = "binomial") %>%
 
 ## Play time
 -   use any of my data or your own data to create:
+    -   a new variable
     -   table1
     -   a figure
     -   fit a model
