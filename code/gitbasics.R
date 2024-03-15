@@ -1,7 +1,7 @@
 
 ## if you haven't already, need to install Git https://happygitwithr.com/install-git
 
-## submit code directly to terminal using CMD + option + return
+## submit code directly to terminal using CMD + option + return (mac...assuming its similar set of buttons for windows?)
 ### git commands run in terminal
 git --version
 
@@ -16,7 +16,7 @@ git config --list
 
 ### navigate to where you want to save the repository
 cd
-cd "/Users/jlee/Library/CloudStorage/Box-Box/jlee/"
+cd "/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop"
 
 ### clone respository 
 git clone https://github.com/justinhylee/QSU_RWorkshop
@@ -29,7 +29,7 @@ echo "jl testing push" >> README.md
 git status
 
 ## stage the change(s) to be committed to GitHub
-git add .  ## note . will stage everything, but can use a file name if just one file to be staged
+git add README.md  ## note . will stage everything, but can use a file name if just one file to be staged
 git status
 
 ## prep for commit, add a comment if you want

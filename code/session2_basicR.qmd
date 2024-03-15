@@ -1,0 +1,515 @@
+---
+title: "Session 2: Basic R"
+author: "Justin Lee"
+date: "`r Sys.Date()`"
+# date: "2023-01-29"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    toc: true
+editor: source
+execute: 
+  freeze: true
+editor_options: 
+  chunk_output_type: console
+---
+
+# Session 2: Basic R
+
+## Data types and structures:
+```{r}
+## numeric
+num <- 1
+class(num)
+
+## character
+char <- "char"
+class(char)
+
+chars <- c("char1", "char2", "char3",
+           "char1", "char2", "char3")
+class(chars)
+chars
+
+## factor
+fac <- factor("fac")
+class(fac)
+fac
+
+facs <- factor(c("fac1", "fac2", "fac3",
+                    "fac1", "fac2", "fac3"))
+class(facs)
+facs
+
+
+## logical
+logical <- TRUE
+class(logical)
+
+## dates
+date_char <- "2024-03-13"
+class(date_test)
+date_date <- as.Date("2024-03-13")
+class(date_date)
+
+## what's the difference...you can calculate time from a Date variable but not a character variable:
+date_today <- Sys.Date()
+
+date_today - date_char
+date_today - date_date
+
+
+## lists
+list <- list(num, char, facs)
+list
+list[1]
+
+## vectors
+vec <- c(1:10)
+class(vec)
+vec
+vec*3
+
+vec2 <- c(1:10, char)
+class(vec2)
+vec2
+
+## matrices
+mat <- matrix(c(vec,vec), nrow=2, byrow = TRUE)
+class(mat)
+mat
+
+mat[1,]
+mat[,1]
+
+mat[,10] - mat[,1]
+
+## dataframes
+df <- as.data.frame(mat)
+class(df)
+df
+
+df$V1
+
+df$V10 - df$V1
+```
+
+## Installing and loading R Packages
+```{r}
+## installing from CRAN
+install.packages("dplyr")
+# install.packages("dplyr", repos="http://cran.us.r-project.org", dependencies=TRUE)
+
+## installing specific versions
+# install.packages("ggplot2", version='3.4.3')
+
+## installing multiple packages at once
+install.packages(c("dplyr", "ggplot2", "gtsummary", "devtools", "redcapAPI"))
+
+
+## installing from github
+devtools::install_github("abresler/nbastatR")
+
+## installing from zip file
+# install.packages("pathtozipfile", repos = NULL, type = "source")
+
+
+## loading packages
+library(dplyr)
+library(ggplot2)
+library(gtsummary)
+
+## checking package version
+### R version:
+version
+### package versions:
+packageVersion("ggplot2")
+
+###
+sessionInfo()
+```
+
+## Setting your directory
+```{r}
+## check what directory you're currently in:
+getwd()
+
+## change your directory
+setwd(paste0(getwd(), "/data"))
+getwd()
+```
+
+
+## Reading data
+-   need to know a little about your data -- what format its in (csv, xlsx, txt, REDCap, pdf)
+-   csv are comma-separated, but other data types might be delimited by something else (tabs, space, ;)
+```{r}
+
+## csv files:
+## if you are in the directory where your data lives you can just include the data file:
+zips_proj <- read.csv("ZiPS_pitchers_20240218.csv", stringsAsFactors = FALSE)
+
+## if you're not in the correct directory, you can still read from the exact path:
+# zips_proj <- read.csv("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_R/data/ZiPS_pitchers_20240218.csv", stringsAsFactors = FALSE)
+
+## another way to read the csv file
+zips_proj2 <- read.table("ZiPS_pitchers_20240218.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
+
+
+## check if dataframes are the same
+all.equal(zips_proj, zips_proj2)
+## another way to check using "diffdf" package
+diffdf::diffdf(zips_proj, zips_proj2)
+
+
+## xlsx files, need to use readxl package
+batx_proj <- readxl::read_xlsx("TheBatX_batters_20240218.xlsx", sheet = "Sheet1")
+
+
+
+
+
+## from REDCap:
+############ READ IN REDCAP PROJECT ############
+library(redcapAPI)
+# Set the url to the api
+api_url = 'https://redcap.stanford.edu/api/'
+# Set token specific to your REDCap project
+token = "5CD788EB6A37ED815BECDDBEA3971D89" ## character string of your token requested from REDCap; note this is JL's token for test REDCap...you can use it for this data, but for your own project data you'll need your own token
+# Export from REDCap
+rcon <- redcapConnection(url=api_url, token=token) #Create a connection.
+recipes <- exportRecords(rcon, factors=T, labels = FALSE, dates = TRUE, checkboxLabels = FALSE) #Call the server -- make sure you're connected through VPN
+
+
+## from nbastatR package:
+library(nbastatR)
+
+### get all game logs:
+Sys.setenv("VROOM_CONNECTION_SIZE"=131072*2)
+nbastat <- nbastatR::game_logs(seasons = 2024, league = "NBA", result_types = "player") %>%
+  dplyr::select(namePlayer, dateGame, slugTeam, slugOpponent, isWin, minutes, fgm, fga, pctFG, fg3m, fg3a, pctFG3,
+                ftm, fta, pctFT, pts, oreb, dreb, ast, stl, blk, tov)
+
+## in case the nbastatR call doesn't work, i saved the data when i pulled it yesterday
+# saveRDS(nbastat, "nbastat.rds")
+# nbastat <- readRDS("nbastat.rds")
+
+## scraping data from baseball reference:
+library(rvest)
+url = "https://www.baseball-reference.com/players/gl.fcgi?id=bettsmo01&t=b&year=2023#batting_gamelogs" %>%
+  read_html()
+
+mookie = url %>%
+  html_elements("table") %>%
+  html_table(header = TRUE)
+
+gamelog_mookie = as.data.frame(mookie[5]) %>%
+  ## drop the rows that are table headers and the last row of totals:
+  ## Rk seems like the game number, the headers are character string months (May, Jun, etc)
+  ## quick and dirty way to do this is make a numeric variable of Rk...that will set any non-numeric values to NA and then drop NA rows
+  mutate(gamenum=as.numeric(Rk)) %>%
+  filter(!is.na(gamenum))
+
+
+## from PDF:
+## jl check Ariadna's slack messages on what/how to do this
+
+
+
+## save specific objects
+save(api_url, file="REDCap_url.RData")
+## save out whole environment:
+save.image(file="QSU_RWorkshop_Session2.RData")
+
+```
+
+## Getting to know your data
+
+```{r}
+
+class(zips_proj)
+## check how many rows and columns
+dim(zips_proj)
+head(zips_proj[1:5, c(1:5)])
+
+## check column names
+names(zips_proj)
+
+
+
+## look at a numeric variable
+class(zips_proj$IP)
+summary(zips_proj$IP)
+
+hist(zips_proj$IP)
+plot(zips_proj$IP, zips_proj$W)
+
+
+## look at a character variable
+class(zips_proj$Team)
+
+table(zips_proj$Team, useNA = "ifany")
+# with(zips_proj, table(Team, useNA = "ifany"))
+
+## check the class of all variables in the dataframe
+# lapply(zips_proj, class)
+str(zips_proj)
+
+
+
+## check for duplicates
+length(unique(zips_proj$Name))
+length(unique(zips_proj$Team))
+
+```
+
+## Cleaning/Manipulating data
+### setting "" to NA
+```{r}
+## setting blanks to NA
+table(zips_proj$Team, useNA = "ifany")
+
+zips_proj$Team[which(zips_proj$Team=="")] <- NA
+table(zips_proj$Team, useNA = "ifany")
+
+```
+### fixing/re-grouping categorical vars
+-   American League East: TBR, NYY, BAL, TOR, BOS
+-   American League Central: CLE, MIN, DET, KCR, CHW
+-   American League West: TEX, LAA, SEA, HOU, OAK
+-   National League East: PHI, NYM, WSN, MIA, ATL
+-   National League Central: STL, CHC, MIL, PIT, CIN
+-   National League West: SFG, LAD, SDP, ARI, COL
+```{r}
+
+zips_proj <- zips_proj %>%
+  mutate(division = case_when(Team %in% c("TBR", "NYY", "BAL") ~ "AMERICAN LEAGUE EAST",
+                              Team %in% c("TOR", "BOS") ~ "AL EAST",
+                              Team %in% c("CLE", "MIN", "DET") ~ "Am Lg Central",
+                              Team %in% c("KCR", "CHW") ~ "aMerican league central",
+                              Team %in% c("TEX", "LAA", "SEA") ~ "alwest",
+                              Team %in% c("HOU", "OAK") ~ "American League West",
+                              Team %in% c("PHI", "NYM", "WSN", "MIA", "ATL") ~ "National League East",
+                              Team %in% c("STL", "CHC", "MIL", "PIT") ~ "NL Central",
+                              Team=="CIN" ~ NA,
+                              Team %in% c("SFG", "LAD", "SDP", "ARI", "COL") ~ "NLWEST"
+                              )
+         )
+
+
+table(zips_proj$division, useNA = "ifany")
+
+
+## FIX THESE DIVISIONS
+```
+
+
+## Manipulating data
+-   subsetting data
+-   creating new variables
+-   wide to long and back
+-   
+```{r}
+
+## subset using base R
+tab1 <- zips_proj[which(zips_proj$Team %in% c("LAD", "SFG")),]
+
+## create a variable using base R
+unique(tab1$Name)
+tab1$POS[tab1$Name=="Logan Webb"] <- "Starting Pitcher"
+
+tab1$POS[tab1$Name %in% c("Yoshinobu Yamamoto", "Walker Buehler", "Julio Urías", "Bobby Miller")] <- "Starting Pitcher"
+
+tab1$POS[grepl("Shohei|Alex|Glasnow|Clayton", tab1$Name)] <- "Starting Pitcher"
+
+tab1$POS[10:14] <- "Starting Pitcher"
+
+# tab1[, c("Name", "POS")]
+
+tab1$POS <- ifelse(!is.na(tab1$POS), tab1$POS, "Relief Pitcher")
+
+table(tab1$POS, useNA = "ifany")
+
+## exclude some players that are injured/suspended/won't play:
+tab1 <- tab1[which(!tab1$Name %in% c("Walker Buehler", "Julio Urías")),]
+
+
+## do everything we did above using dplyr
+tab1.dplyr <- zips_proj %>%
+  filter(Team %in% c("LAD", "SFG")) %>%
+  mutate(POS=case_when(Name=="Logan Webb" ~ "Starting Pitcher",
+                       Name %in% c("Yoshinobu Yamamoto", "Walker Buehler", "Julio Urías", "Bobby Miller") ~ "Starting Pitcher",
+                       grepl("Shohei|Alex|Glasnow|Clayton", Name) ~ "Starting Pitcher",
+                       row_number() %in% c(10:14) ~ "Starting Pitcher",
+                       TRUE ~ "Relief Pitcher"
+                       )
+         ) %>%
+  filter(!Name %in% c("Walker Buehler", "Julio Urías"))
+
+diffdf::diffdf(tab1, tab1.dplyr)
+
+
+```
+
+### pivoting data long to wide and back
+-   using Mookie Bett's 2023 game log
+```{r}
+names(gamelog_mookie)
+
+## make a shorter df for demo
+df_game <- gamelog_mookie %>%
+  select(Rk, Rslt, PA, AB, R, H, HR, RBI, BB, OBP) %>%
+  rename("Game"="Rk") %>%
+  filter(row_number() %in% c(1:5))
+
+## pivot to long data using tidyr::pivot_longer()
+df_long <- df_game %>%
+  tidyr::pivot_longer(!Game, names_to = "stat", values_to = "value")
+
+## pivot back to wide data
+df_wide <- df_long %>%
+  tidyr::pivot_wider(names_from = stat,
+                     values_from = value)
+```
+
+
+## Creating Table 1
+-   jl likes to use gtsummary package
+-   others i've used a lot in the past: tableone
+
+```{r}
+
+### USING GTSUMMARY ###
+require(gtsummary)
+## note on require -- does the same as library() but will continue executing submitted code if package does not exist; not really useful in this case, but can be useful if its within an Rscript or function where you still want the code to run
+
+### try using gtsummary -- 
+reset_gtsummary_theme()
+# theme_gtsummary_journal(journal = "jama")
+theme_gtsummary_compact()
+
+dput(names(tab1))
+vars_tab1 <- c("Team", "IP", "W", "L", "SV", "K.9", "BB.9", "K.BB", "ERA", "WHIP")
+
+tab1 %>%
+  select(vars_tab1) %>%
+  tbl_summary(by=Team,
+    type = list(c("IP", "W", "L", "SV", "K.9", "BB.9", "K.BB", "ERA", "WHIP") ~ "continuous"),
+              # statistic = list(c("ConnectivityZscore") ~ "{median} [{p25}, {p75}]"
+              #                  ),
+              missing_text = "Missing",
+              label = list(IP ~ "Innings Pitched",
+                           W ~ "Wins",
+                           L ~ "Losses",
+                           SV ~ "Saves",
+                           K.9 ~ "Strikeouts per 9 innings",
+                           BB.9 ~ "Walks per 9 innings",
+                           K.BB ~ "Strikeouts per walk",
+                           ERA ~ "Earned Run Average",
+                           WHIP ~ "Walks + Hits per inning pitched"
+                          )
+              ) %>%
+  add_stat_label() %>%
+  modify_spanning_header(all_stat_cols() ~ "**Team**") %>%
+  add_difference(everything() ~ "smd") %>%
+  modify_column_hide(columns=ci)
+
+
+### USING tableone ###
+library(tableone)
+
+tab1_v2 <- CreateTableOne(data = tab1, vars = vars_tab1, strata = "Team")
+tab1_v2
+
+## by default the function will give you p-values; add SMD:
+print(tab1_v2, smd = TRUE)
+
+## jl note i stopped using this because once the table is created you still have to copy/paste into excel or output as a csv and do some manual editing to make it look nicer
+```
+
+## Creating figures
+-   awesome dataviz website for choosing plot type: https://www.data-to-viz.com/ 
+    -   or ask Kate
+```{r}
+## gtools::mixedsort for sorting alphanumeric:
+# gtools::mixedsort(unique(tab1debug$PIDN[which(tab1debug$Visit!=1)]))
+
+library(ggplot2)
+library(directlabels)
+
+ggplot(data=df_long[which(df_long$stat %in% c("PA", "R", "H", "HR", "RBI")),], aes(x=Game, y=value, color=stat)) +
+  geom_point() +
+  geom_line(aes(group=stat)) +
+  theme_bw() +
+  labs(x="Game Number", y="Value", color="Stat") +
+  ## directlabels package:
+  directlabels::geom_dl(aes(label=stat), method = list(directlabels::dl.trans(x=x+0.5), "last.points"), cex = 0.8)
+```
+
+## Fitting a model
+-   packages needed: "lme4", "lmerTest", "gtsummary"
+```{r}
+library(lme4)
+library(lmerTest)
+library(gtsummary)
+
+## fit a basic logistic model of Wins regressed on some Mookie Betts stats
+head(gamelog_mookie)
+str(gamelog_mookie)
+## jl is going to do this with dplyr, but we can do it using base R too if there's time
+
+df_mod <- gamelog_mookie %>%
+  ## first we need to clean up that Rslt column:
+  mutate(Win = case_when(grepl("W", Rslt) ~ 1,
+                         grepl("L", Rslt) ~ 0,
+                         TRUE ~ NA),
+         ## looks like our numeric variables are all character, so we need to change that
+         PA.num = as.numeric(PA),
+         H.num = as.numeric(H),
+         SO.num = as.numeric(SO),
+         
+         ## also make a month variable to add as a random effect
+         ## use gsub to only keep characters from Date variable:
+         month = gsub("[^[:alpha:]]", "", Date)
+                      ) %>%
+  ## another quicker way to change to numeric:
+  # mutate_at(.vars=c("PA", "R", "H", "HR", "RBI", "SO"), as.numeric) %>%
+  select(Date, month, Win, PA, PA.num, H, H.num, SO, SO.num)
+
+str(df_mod)
+
+table(df_mod$Win, useNA = "ifany")
+
+mod <- glm(Win ~ PA.num + H.num + SO.num, data=df_mod, family = "binomial")
+summary(mod)
+
+# ## throw in a random effect for month?
+# mod2 <- glmer(Win ~ PA.num + H.num + SO.num + (1|month), data=df_mod, family = "binomial")
+# summary(mod2)
+
+
+### output model results using gtsummary:
+glm(Win ~ PA.num + H.num + SO.num, data=df_mod, family = "binomial") %>%
+  tbl_regression(exponentiate=TRUE,
+                 label = list(PA.num ~ "Plate Appearances",
+                              H.num ~ "Hits",
+                              SO.num ~ "Strikeouts")
+  )
+```
+
+## Play time
+-   use any of my data or your own data to create:
+    -   table1
+    -   a figure
+    -   fit a model
+```{r}
+
+```
+
+
+
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.

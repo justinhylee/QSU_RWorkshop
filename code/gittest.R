@@ -9,3 +9,5 @@ df <- df_og %>%
 
 ## add more code to test github
 summary(df$ERA)
+
+look <- df[which(df$Name == )]

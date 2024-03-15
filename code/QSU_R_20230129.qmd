@@ -1,0 +1,73 @@
+---
+title: "QSU R Workshop"
+author: "Justin Lee"
+date: "`r Sys.Date()`"
+# date: "2023-01-29"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    toc: true
+editor: source
+execute: 
+  freeze: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Session 1: Coding Best Practices
+
+-   commenting, versioning, sharing code
+    -   useful file naming: easy to understand, suffix with date (\_YYYYMMDD) or prefix, self-versioning if not using Box or GitHub; jl usually has a \_dev file that's in development and saves a dated version if MANY changes have been made since last save
+    -   R specific:
+        -   compartmentalize into SEPARATE PROJECTS
+        -   "renv" (or "slushy", "docker", etc) to freeze R package versions within each project
+-   pros/cons of QSU server, Box, GitHub, etc
+    -   Box and GitHub will save old versions of files that you can recover; QSU server does not (...you can but requires Jeff looking back to a specific sync date and restoring)
+    -   QSU Server: how to log in, best practices on when/what to save
+    -   Box: installing Box Drive to automatically sync directories
+    -   GitHub:
+        -   benefits of GitHub: version control, easily look at what's changed between file versions, if you're ever working on the same piece of code with collaborators you can each have your own branch and then only merge when ready
+        -   how to use GitHub: push/pull/merge both by GUI and by terminal code (or R package)
+
+## Session 2: Basic R
+
+-   Base R vs RStudio
+    -   RStudio suite of tools to make R coding easier (also can do Python, Julia)
+        -   see what your data looks like, see what's in your directory, autofill variable names, send code straight to terminal, table/figure preview
+-   common data cleaning/manipulation tasks
+    -   reading data: csv/xlsx/txt/XX delimited file, REDCap/RCC (API), BigQuery, others...
+    -   how to get a sense of what your data contains (# of rows/columns, how the data is formatted, check for duplicates, missing, etc)
+    -   subset data
+    -   recode data -- check/change variable class (numeric, character, factor)
+    -   long to wide and vice versa
+    -   
+-   creating tables/figures
+    -   Table1: many ways to do this, jl current fave: "gtsummary" package
+    -   Flow (CONSORT) Diagrams: jl doesn't have a great way to do this yet...maybe someone else does
+    -   <https://www.data-to-viz.com/> -- awesome dataviz website for choosing plot type
+
+## Session 3: Advanced R
+
+-   For loops, if clauses, writing your own functions
+-   Parallel computing (locally and in Sherlock/GCP)
+-   Shiny dashboards
+
+## Session 4: Quarto/RMarkdown
+
+-   how to create self-contained analysis documents
+-   publishing to <https://quartopub.com/>
+
+## Session 5: My favorite/most used R packages
+
+-   plus everyone else's favorites
+
+```{r}
+#| echo: false
+#| warning: false
+
+```
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
