@@ -77,7 +77,7 @@ df_gamelog = plyr::rbind.fill(df_gamelog, gamelog)
 }
 
 ## save this data for later
-# saveRDS(df_gamelog, "/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_R/data/baseball_gamelogs2023.rds")
+# saveRDS(df_gamelog, "/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2023.rds")
 
 ## DEBUG
 ## how do i get player name from the id_url vector?
@@ -241,7 +241,7 @@ cd test_dir2
 
 ## sync your local folder into Sherlock directory:
 ## i think Sherlock doesn't know how to connect to Box Sync...or more likely jl doesn't know how to make it connect to Box Sync
-rsync -a -v --stats '/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_R/code/' jhylee@login.sherlock.stanford.edu:/test_dir2
+rsync -a -v --stats '/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/code/' jhylee@login.sherlock.stanford.edu:/test_dir2
 
 ## need to move file out of Box to rsync or scp...but easier way: use FETCH
 
@@ -314,7 +314,7 @@ library(ggplot2)
 library(plotly) ## this is a cool package that easily adds some interactive features to ggplots like hover over, zoom, print, etc
 
 ## get some data:
-shinydat <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_R/data/baseball_gamelogs2023.rds")
+shinydat <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2023.rds")
 
 ## jl is not creative and doing this last minute so make same long data as before:
 ## pivot to long data using tidyr::pivot_longer()

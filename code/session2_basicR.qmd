@@ -128,7 +128,7 @@ library(gtsummary)
 version
 ### package versions:
 packageVersion("ggplot2")
-update("ggplot2")
+# update("ggplot2")
 
 ###
 sessionInfo()
