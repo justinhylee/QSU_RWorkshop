@@ -29,11 +29,11 @@ echo "jl testing push" >> README.md
 git status
 
 ## stage the change(s) to be committed to GitHub
-git add README.md  ## note . will stage everything, but can use a file name if just one file to be staged
+git add .  ## note . will stage everything, but can use a file name if just one file to be staged
 git status
 
 ## prep for commit, add a comment if you want
-git commit -m 'jl commit test'
+git commit -m 'jl commit session3_advancedR.qmd'
 
 ## push to GitHub
 ## jl note need to use a personal access token now instead of password: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens

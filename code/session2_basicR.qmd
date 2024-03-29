@@ -24,7 +24,7 @@ num <- 1
 class(num)
 
 ## character
-char <- "char"
+char <- "texteoiwjegqw"
 class(char)
 
 chars <- c("char1", "char2", "char3",
@@ -49,7 +49,7 @@ class(logical)
 
 ## dates
 date_char <- "2024-03-13"
-class(date_test)
+class(date_char)
 date_date <- as.Date("2024-03-13")
 class(date_date)
 
@@ -73,14 +73,14 @@ vec*3
 
 vec2 <- c(1:10, char)
 class(vec2)
-vec2
+vec2*3
 
 ## matrices
 mat <- matrix(c(vec,vec), nrow=2, byrow = TRUE)
 class(mat)
 mat
 
-mat[1,]
+mat[1,1]
 mat[,1]
 
 mat[,10] - mat[,1]
@@ -90,7 +90,9 @@ df <- as.data.frame(mat)
 class(df)
 df
 
+mat[,1]
 df$V1
+df[, 1]
 
 df$V10 - df$V1
 ```
@@ -120,11 +122,13 @@ library(dplyr)
 library(ggplot2)
 library(gtsummary)
 
+
 ## checking package version
 ### R version:
 version
 ### package versions:
 packageVersion("ggplot2")
+update("ggplot2")
 
 ###
 sessionInfo()
@@ -156,11 +160,13 @@ zips_proj <- read.csv("ZiPS_pitchers_20240218.csv", stringsAsFactors = FALSE)
 ## another way to read the csv file
 zips_proj2 <- read.table("ZiPS_pitchers_20240218.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
 
+zips_proj3 <- data.table::fread("ZiPS_pitchers_20240218.csv")
+
 
 ## check if dataframes are the same
-all.equal(zips_proj, zips_proj2)
+all.equal(zips_proj, zips_proj3)
 ## another way to check using "diffdf" package
-diffdf::diffdf(zips_proj, zips_proj2)
+diffdf::diffdf(zips_proj, zips_proj3)
 
 
 ## xlsx files, need to use readxl package
@@ -280,8 +286,8 @@ table(zips_proj$Team, useNA = "ifany")
 
 ## when to use which for subsetting:
 ## usually it doesn't make a difference, but if your condition is NA and you don't use which it will return XX rows of all NA values for however NA's are in your subset condition:
-test <- zips_proj[zips_proj$Team=="ARI",]
-test2 <- zips_proj[which(zips_proj$Team=="ARI"),]
+test <- zips_proj[zips_proj$Team %in% "ARI",]
+test2 <- zips_proj[which(zips_proj$Team %in% c("ARI")),]
 
 
 # zips_proj$Team=="LAD"
