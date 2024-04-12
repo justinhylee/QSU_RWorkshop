@@ -372,7 +372,8 @@ tab1.dplyr <- zips_proj %>%
 
 diffdf::diffdf(tab1, tab1.dplyr)
 
-
+## save this data for later
+# saveRDS(tab1, "/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/tab1.rds")
 ```
 
 ### pivoting data long to wide and back
@@ -382,9 +383,9 @@ names(gamelog_mookie)
 
 ## make a shorter df for demo
 df_game <- gamelog_mookie %>%
-  select(Rk, Rslt, PA, AB, R, H, HR, RBI, BB, OBP) %>%
+  dplyr::select(Rk, Rslt, PA, AB, R, H, HR, RBI, BB, OBP) %>%
   rename("Game"="Rk") %>%
-  filter(row_number() %in% c(1:5))
+  filter(row_number() %in% c(1:5)) 
 
 ## pivot to long data using tidyr::pivot_longer()
 df_long <- df_game %>%
@@ -400,6 +401,7 @@ df_wide <- df_long %>%
 ## Creating Table 1
 -   jl likes to use gtsummary package
 -   others i've used a lot in the past: tableone
+-   packages to check out: Qwraps2
 
 ```{r}
 
@@ -416,8 +418,8 @@ dput(names(tab1))
 vars_tab1 <- c("Team", "IP", "W", "L", "SV", "K.9", "BB.9", "K.BB", "ERA", "WHIP")
 
 tab1 %>%
-  select(vars_tab1) %>%
-  tbl_summary(by=Team,
+  dplyr::select(vars_tab1) %>%
+  gtsummary::tbl_summary(by=Team,
     type = list(c("IP", "W", "L", "SV", "K.9", "BB.9", "K.BB", "ERA", "WHIP") ~ "continuous"),
               # statistic = list(c("ConnectivityZscore") ~ "{median} [{p25}, {p75}]"
               #                  ),
@@ -498,7 +500,7 @@ df_mod <- gamelog_mookie %>%
                       ) %>%
   ## another quicker way to change to numeric:
   # mutate_at(.vars=c("PA", "R", "H", "HR", "RBI", "SO"), as.numeric) %>%
-  select(Date, month, Win, PA, PA.num, H, H.num, SO, SO.num)
+  dplyr::select(Date, month, Win, PA, PA.num, H, H.num, SO, SO.num)
 
 str(df_mod)
 

@@ -1,9 +1,5 @@
 ---
 title: "Session 3: Advanced R"
-editor_options: 
-  chunk_output_type: console
----
-title: "Session 2: Basic R"
 author: "Justin Lee"
 date: "`r Sys.Date()`"
 # date: "2023-01-29"
@@ -18,6 +14,7 @@ execute:
 editor_options: 
   chunk_output_type: console
 ---
+
 
 # Session 3: Advanced R
 -   for loops, if clauses, writing your own functions
@@ -94,6 +91,8 @@ test = df_gamelog %>%
   mutate_at(c("H", "X2B", "X3B", "HR"), as.numeric) %>%
   ## keep just some vars for cleaner example:
   dplyr::select(player, gamenum, H, X2B, X3B, HR)
+
+head(test)
 
 calctotbases = FALSE
 if(calctotbases){
@@ -210,6 +209,7 @@ system.time(
   } ## closes %dopar%
 ) ## closes system.time()
 
+# diffdf::diffdf(df_gamelog_dopar, df_gamelog)
 ```
 
 ## Sherlock:
@@ -242,7 +242,9 @@ cd test_dir2
 ## sync your local folder into Sherlock directory:
 ## i think Sherlock doesn't know how to connect to Box Sync...or more likely jl doesn't know how to make it connect to Box Sync
 rsync -a -v --stats '/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/code/' jhylee@login.sherlock.stanford.edu:/test_dir2
-
+## try using scp; also need to move out of Box Sync so i can pull *.csv
+scp Desktop/hg38/*.csv jhylee@login.sherlock.stanford.edu:/oak/stanford/groups/zihuai/AD_WGS/ADSP/REScan/data/hg38/
+  
 ## need to move file out of Box to rsync or scp...but easier way: use FETCH
 
 
