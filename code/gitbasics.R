@@ -33,7 +33,7 @@ git add .  ## note . will stage everything, but can use a file name if just one 
 git status
 
 ## prep for commit, add a comment if you want
-git commit -m 'jl commit session3_advancedR.qmd'
+git commit -m 'jl commit session5_favepackages.qmd'
 
 ## push to GitHub
 ## jl note need to use a personal access token now instead of password: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
