@@ -15,21 +15,24 @@ editor_options:
   chunk_output_type: console
 ---
 
-
 # Session 3: Advanced R
+
 -   for loops, if clauses, writing your own functions
 -   parallel computing -- locally and intro to Sherlock
 -   Shiny dashboards
+-   
 
 ## Set up libraries:
+
 ```{r}
 library(dplyr)
 
 ```
 
-
 ## For loops:
+
 -   when you want to iterate a chunk of code over multiple XX
+
 ```{r}
 
 ## going back to our baseball reference scraping code:
@@ -83,7 +86,9 @@ df_gamelog = plyr::rbind.fill(df_gamelog, gamelog)
 ```
 
 ## If clauses:
+
 -   when you want to apply chunk of code to only some XX
+
 ```{r}
 
 test = df_gamelog %>%
@@ -113,7 +118,9 @@ if(calctotbases){
 ```
 
 ## Writing your own functions:
+
 -   write a function to create the plot from session2_basicR.qmd choosing the "player" and stat
+
 ```{r}
 library(ggplot2)
 library(directlabels)
@@ -162,7 +169,9 @@ plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var =
 ```
 
 ## Parallel Computing:
+
 -   examples of when i parallelize:
+
     -   i need to run many iterations of a similar model (ie GWAS running many models for each SNP)
     -   i have a huge dataframe that i need to create new vars for but it takes forever
     -   i need to run an Rscript that is very resource heavy that my laptop can't handle
@@ -170,6 +179,7 @@ plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var =
 -   each "job" needs to be self-contained...ie if i create a variable in one core, other cores will not know about it
 
 -   jl mostly uses doParallel (https://cran.r-project.org/web/packages/doParallel/doParallel.pdf), but planning to check out "furrr" (https://furrr.futureverse.org/) when i have some time
+
 ```{r}
 ##run this in parallel
 library(doParallel)
@@ -181,16 +191,22 @@ getDoParWorkers() #checks how many cores in use
 print(cl)
 
 ### jl left off here, figure out something to parallelize
+id_url = c("https://www.baseball-reference.com/players/gl.fcgi?id=bettsmo01&t=b&year=2024#batting_gamelogs",
+           "https://www.baseball-reference.com/players/gl.fcgi?id=ohtansh01&t=b&year=2024#batting_gamelogs",
+           "https://www.baseball-reference.com/players/gl.fcgi?id=freemfr01&t=b&year=2024#batting_gamelogs"
+           )
 ## wrap with system.time so you can see how long it took to run
 system.time(
   ## foreach actually comes from the foreach package but its a dependency for doParallel:
-  df_gamelog_dopar <- foreach(k = c(id_url), .packages = c("rvest"), .combine = rbind) %dopar% {
+  df_gamelog_dopar <- foreach(j = c(id_url), .packages = c("rvest"), .combine = rbind) %dopar% {
+    require(dplyr)
+    require(rvest)
     url = j %>%
-      read_html()
+      rvest::read_html()
     
     gamelog = url %>%
-      html_elements("table") %>%
-      html_table(header = TRUE)
+      rvest::html_elements("table") %>%
+      rvest::html_table(header = TRUE)
     
     gamelog = as.data.frame(gamelog[5]) %>%
       ## drop the rows that are table headers and the last row of totals:
@@ -209,15 +225,19 @@ system.time(
   } ## closes %dopar%
 ) ## closes system.time()
 
-# diffdf::diffdf(df_gamelog_dopar, df_gamelog)
+## save this data for later
+# saveRDS(df_gamelog_dopar, "/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2024.rds")
 ```
 
 ## Sherlock:
+
 -   Stanford's computer cluster (https://www.sherlock.stanford.edu/docs/getting-started/#prerequisites)
--   To get an account you'll need Manisha to email srcc-support@stanford.edu with your SUNet ID
+-   To get an account you'll need Manisha/Mary to email srcc-support\@stanford.edu with your SUNet ID
 -   QSU has its own partitions -p qsu
     -   depending on the requirements (memory, time, number of cores, etc) we can also use owners and normal partitions
+-   submit jobs to Sherlock through Slurm: https://slurm.schedmd.com/documentation.html
 -   NO PHI!
+
 ```{r}
 ## log in to Sherlock
 ## reminder in RStudio can submit code to Terminal with CMD + option + return
@@ -237,27 +257,35 @@ rm -r test_dir test_dir2
 mkdir -m777 QSU_RWorkshop 
 
 ## navigate to another directory
-cd test_dir2
+cd QSU_RWorkshop
 
 ## sync your local folder into Sherlock directory:
-## i think Sherlock doesn't know how to connect to Box Sync...or more likely jl doesn't know how to make it connect to Box Sync
-rsync -a -v --stats '/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/code/' jhylee@login.sherlock.stanford.edu:/test_dir2
-## try using scp; also need to move out of Box Sync so i can pull *.csv
-scp Desktop/hg38/*.csv jhylee@login.sherlock.stanford.edu:/oak/stanford/groups/zihuai/AD_WGS/ADSP/REScan/data/hg38/
+# ## i think Sherlock doesn't know how to connect to Box Sync...or more likely jl doesn't know how to make it connect to Box Sync
+# rsync -a -v --stats '/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/code/' jhylee@login.sherlock.stanford.edu:/test_dir2
+# ## try using scp; also need to move out of Box Sync so i can pull *.csv
+# scp Desktop/hg38/*.csv jhylee@login.sherlock.stanford.edu:/oak/stanford/groups/zihuai/AD_WGS/ADSP/REScan/data/hg38/
   
-## need to move file out of Box to rsync or scp...but easier way: use FETCH
+## need to move file out of Box to rsync or scp...but easier way: use FETCH -- download from Stanford Sherlock website: https://www.sherlock.stanford.edu/docs/storage/data-transfer/#scp-secure-copy
 
 
 ## look at below RScript and sbatch files
-## submit sbatch file with array=1-10
+## submit sbatch file with array=1-3
 cd /home/users/jhylee/QSU_RWorkshop
 sbatch -p qsu,owners,normal --array=1-3 test_arraynum.sbatch
 
 ## remove .out and .err files
 rm *.out *.err
+
+
+## to open an interactive Sherlock session:
+##### in Sherlock R #####
+sh_dev -p qsu -m 1G -t 01:00:00
+ml R
+R
 ```
 
 ### Rscript
+
 ```{r}
 ## jl make up some simple Rscript that we can submit to Sherlock with XX iterations
 ## below is added to test_arraynum.R file
@@ -270,6 +298,7 @@ write.table(text_test, paste0("arraytest", args, ".txt"), col.names = FALSE, row
 ```
 
 ### sbatch file
+
 ```{r}
 ## sbatch file that will get submittted to Sherlock to run above Rscript
 
@@ -289,20 +318,24 @@ R --vanilla < test_arraynum.R --args ${SLURM_ARRAY_TASK_ID}
 
 ```
 
-
 ## Shiny:
+
 -   https://shiny.posit.co/
--   Shiny apps/dashboards allow the user to have interactive tables/figures/etc 
+
+-   Shiny apps/dashboards allow the user to have interactive tables/figures/etc
+
 -   At QSU: i use it mostly for clinical trials to track enrollment, demographics, etc
 
 -   it can all be written in one .R file, but the more complicated it gets usually we'd split them into 2-3ish files:
+
     -   app.R -- this runs the app
     -   server.R -- this consists of all the functions to create what you want to display in the Shiny app
     -   ui.R -- this creates the outline of what the Shiny app looks like
-    
+
 -   you can run the app locally on your own computer or server or have it hosted somewhere like shinyapps.io (QSU has an account)
+
     -   for Free plan: you can have up to 5 apps
-    -   QSU has Standard plan: unlimited number of apps, some limit on active hours, can restrict access by email login 
+    -   QSU has Standard plan: unlimited number of apps, some limit on active hours, can restrict access by email login
 
 ```{r}
 ## let's make a basic Shiny app
@@ -316,7 +349,7 @@ library(ggplot2)
 library(plotly) ## this is a cool package that easily adds some interactive features to ggplots like hover over, zoom, print, etc
 
 ## get some data:
-shinydat <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2023.rds")
+shinydat <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2024.rds")
 
 ## jl is not creative and doing this last minute so make same long data as before:
 ## pivot to long data using tidyr::pivot_longer()
@@ -452,7 +485,6 @@ ui <- navbarPage(title = "shiny baseball test",
 ## this will go into the app.R file:
 shinyApp(ui, server)
 ```
-
 
 ## Quarto
 

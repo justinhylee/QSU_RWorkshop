@@ -6,7 +6,7 @@ date: "`r Sys.Date()`"
 engine: knitr
 ## Quarto will look for what code is in the qmd file and choose the engine, but you can specify as knitr (for R), jupyter or python3
 format:
-  html:
+  revealjs:
     ## in place of html can be: revealjs, pdf, docx, pptx https://quarto.org/docs/output-formats/all-formats.html
     self-contained: true
     ## this will keep the table and figure files embedded in the html file; if not true it creates a folder in the same directory with all the files..and if sharing the html file with collaborators, you'll also have to share the folder
@@ -33,22 +33,31 @@ editor_options:
 ---
 
 ## Notes:
+
 -   jl usually starts a Quarto doc with notes, to-dos, where i left off, etc
+    -   test
 
 ## Data source
+
 -   Data last downloaded on XXX
 -   Box directory: /Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2023.rds
+
+```{r}
+
+```
+
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
-df_gamelog <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2023.rds")
+df_gamelog <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2024.rds")
 
 tab1 <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/tab1.rds")
 ```
 
 ## Table 1
+
 ```{r}
 #| echo: true
 #| warning: false
@@ -91,11 +100,11 @@ tab1 %>%
 ```
 
 ## Create separate tabs for different tables/figures/text
+
 -   set up function for plots
     -   jl steal what we did in session3_advancedR.qmd
-    
-::: panel-tabset
 
+::: panel-tabset
 ```{r}
 #| echo: true
 #| warning: false
@@ -142,7 +151,9 @@ plot.stat <- function(data, player_var, stat_var){
 ```
 
 ## Tab 1: Mookie Betts
+
 ### Plot BA and OBP
+
 ```{r}
 #| echo: true
 #| warning: false
@@ -153,6 +164,8 @@ plot.stat(data=df_gamelog_long, player_var = c("bettsmo"), stat_var = c("BA", "O
 ```
 
 ### Plot R and RBI
+-   fdsajiopgwjp
+
 ```{r}
 #| echo: true
 #| warning: false
@@ -163,8 +176,11 @@ plot.stat(data=df_gamelog_long, player_var = c("bettsmo"), stat_var = c("R", "RB
 ```
 
 ## Tab 2: Mookie Betts and Shohei Ohtani
+
 ### Plot BA and OBP
+
 -   jl note direct label getting cut off, up the fig-width for this code chunk
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -175,70 +191,95 @@ plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var =
 ```
 
 ### Something other than the plot.stat function
+
 -   turn this into a plotly
+
     -   plotly::ggplotly()
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-## now call the function with my parameters of choice:
-# plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var = c("R", "RBI"))
 
-  ## filter the data by player and stat vars:
-  plot = df_gamelog_long %>%
-    filter(player %in% c("bettsmo", "ohtansh") & stat %in% c("R", "RBI"))
+    ```{r}
+    #| echo: false
+    #| warning: false
+    #| message: false
+    ## now call the function with my parameters of choice:
+    # plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var = c("R", "RBI"))
+
+      ## filter the data by player and stat vars:
+      plot = df_gamelog_long %>%
+        filter(player %in% c("bettsmo", "ohtansh") & stat %in% c("R", "RBI"))
 
 
-  p1 <- ggplot(data=plot, aes(x=gamenum, y=value, color=stat, shape=player)) +
-    geom_point() +
-    geom_line(aes(group=interaction(stat,player))) +
-    theme_bw() + theme(legend.position = "top") +
-    scale_y_continuous(limits = c(0, max(plot$value, na.rm = TRUE))) +
-    labs(x="Game Number", y="Value", color="Stat", shape="Player") +
-    ## directlabels package:
-    directlabels::geom_dl(aes(label=stat), method = list(directlabels::dl.trans(x=x+0.5), "last.points"), cex = 0.8)
-  
-  plotly::ggplotly(p1)
-  
-  
+      p1 <- ggplot(data=plot, aes(x=gamenum, y=value, color=stat, shape=player)) +
+        geom_point() +
+        geom_line(aes(group=interaction(stat,player))) +
+        theme_bw() + theme(legend.position = "top") +
+        scale_y_continuous(limits = c(0, max(plot$value, na.rm = TRUE))) +
+        labs(x="Game Number", y="Value", color="Stat", shape="Player") +
+        ## directlabels package:
+        directlabels::geom_dl(aes(label=stat), method = list(directlabels::dl.trans(x=x+0.5), "last.points"), cex = 0.8)
+      
+      plotly::ggplotly(p1)
+      
+      
 ```
-
 :::
 
 ## try to get a Shiny plot to filter by any id? -- in progress
+
 -   jl this works in Viewer, but Shiny code needs to be hosted somewhere so won't show up in the html output
 -   in YAML need to set server: shiny
 
 <!-- ```{r} -->
+
 <!-- #| context: server -->
+
 <!-- require(dplyr) -->
+
 <!-- require(ggplot2) -->
+
 <!-- require(plotly) -->
+
 <!-- require(shiny) -->
 
 <!-- df_gamelog <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2023.rds") -->
 
 <!-- ## pivot to long data using tidyr::pivot_longer() -->
+
 <!-- df_gamelog_long <- df_gamelog %>% -->
+
 <!--   # only keep some vars: -->
+
 <!--   dplyr::select(player, gamenum, PA:OPS) %>% -->
+
 <!--   ## pivot to long data -->
+
 <!--   tidyr::pivot_longer(!c(player, gamenum), names_to = "stat", values_to = "value") %>% -->
+
 <!--   ## make value var numeric: -->
+
 <!--   mutate(value=as.numeric(value)) -->
 
 <!-- output$playerPlot <- renderPlot({ -->
+
 <!--   ## filter the data by player and stat vars: -->
+
 <!--   plot = df_gamelog_long %>% -->
+
 <!--     dplyr::filter(player %in% c(input$tab_player) & stat %in% c("BA", "OBP")) -->
 
 <!--   ggplot(data=plot, aes(x=gamenum, y=value, color=stat, shape=player)) + -->
+
 <!--     geom_point() + -->
+
 <!--     geom_line(aes(group=interaction(stat,player))) + -->
+
 <!--     theme_bw() + theme(legend.position = "top") + -->
+
 <!--     scale_y_continuous(limits = c(0, max(plot$value, na.rm = TRUE))) + -->
+
 <!--     labs(x="Game Number", y="Value", color="Stat", shape="Player") + -->
+
 <!--     ## directlabels package: -->
+
 <!--     directlabels::geom_dl(aes(label=stat), method = list(directlabels::dl.trans(x=x+0.5), "last.points"), cex = 0.8) -->
 
 <!-- }) -->
@@ -248,21 +289,22 @@ plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var =
 <!-- ```{r} -->
 
 <!-- checkboxGroupInput("tab_player", "Player:", -->
+
 <!--             choiceValues =  c("bettsmo", "freemfr", "ohtansh"), -->
+
 <!--             choiceNames = c("Mookie Betts", "Freddie Freeman", "Shohei Ohtani"), -->
+
 <!--             selected = "bettsmo") -->
+
 <!-- plotOutput("playerPlot") -->
 
 <!-- ``` -->
 
-
-
 ## jl testing iframe to sneak in Shiny app into Quarto html file?
+
 ```{=html}
 <iframe src="https://thisjustin.shinyapps.io/Baseballislife/" title="https://thisjustin.shinyapps.io/Baseballislife/" width="1200" height="600"></iframe>
 ```
-
-
 ## Quarto
 
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.

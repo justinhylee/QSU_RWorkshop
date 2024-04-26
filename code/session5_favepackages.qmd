@@ -1,0 +1,192 @@
+---
+title: "Session 5: Favorite Packages"
+author: "Justin Lee"
+date: "`r Sys.Date()`"
+# date: "2023-01-29"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    toc: true
+editor: source
+execute: 
+  freeze: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Packages that could be useful to dig into:
+
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| RPackages              | url                                                               | notes                                                                                         |
++========================+===================================================================+===============================================================================================+
+| renv                   | https://rstudio.github.io/renv/articles/renv.html                 | freeze R package versions with snapshot(); load package versions with restore()               |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| gtsummary              | https://www.danieldsjoberg.com/gtsummary/                         | create html tables                                                                            |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| plotly                 | https://plotly.com/r/                                             | add some interactivity to ggplots                                                             |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| patchwork              | https://patchwork.data-imaginist.com/                             | panel figures together; similar to grid, gridExtra                                            |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| htmlwidgets; crosstalk | https://www.htmlwidgets.org/\                                     | interactive plots that can render to browser?                                                 |
+|                        | https://rstudio.github.io/crosstalk/                              |                                                                                               |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| git2r                  | https://docs.ropensci.org/git2r/                                  | R package to clone/push/pull to git                                                           |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| swirl                  | https://swirlstats.com/                                           | learn R within R?                                                                             |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| sassy                  | https://r-sassy.org/                                              | makes R similar to SAS?                                                                       |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| messydates             | https://globalgov.github.io/messydates/                           | another dates package...maybe more flexible/automatic like data.table::fread()?               |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| highcharter            | https://www.highcharts.com/blog/tutorials/highcharts-for-r-users/ | render interactive plots to browser?                                                          |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| tidycensus             | https://walker-data.com/tidycensus/                               |                                                                                               |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| epoxy                  | https://cran.r-project.org/web/packages/epoxy/readme/README.html  | like glue but done in R chunks and uses RStudio autocompletion -- pipe in R objects into text |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+| dashboardBuilder       | https://github.com/petergandenberger/dashboard-builder            | package by Peter Gandenberger that helps create Shiny dashboards without writing code         |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+|                        |                                                                   |                                                                                               |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+|                        |                                                                   |                                                                                               |
++------------------------+-------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+
+## R stickers:
+
++-------------+---------------------+-------------------------------+
+| RPackages   | url                 | notes                         |
++=============+=====================+===============================+
+|             |                     |                               |
++-------------+---------------------+-------------------------------+
+|             |                     |                               |
++-------------+---------------------+-------------------------------+
+|             |                     |                               |
++-------------+---------------------+-------------------------------+
+|             |                     |                               |
++-------------+---------------------+-------------------------------+
+|             |                     |                               |
++-------------+---------------------+-------------------------------+
+
+## patchwork / grid / gridExtra
+
+-   use these to panel figures together
+-   or can use facet_wrap from ggplot2
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+df_gamelog <- readRDS("/Users/jlee/Library/CloudStorage/Box-Box/jlee/QSU_RWorkshop/data/baseball_gamelogs2024.rds")
+
+## pivot to long data using tidyr::pivot_longer()
+df_gamelog_long <- df_gamelog %>%
+  # only keep some vars:
+  dplyr::select(player, gamenum, PA:OPS) %>%
+  ## pivot to long data
+  tidyr::pivot_longer(!c(player, gamenum), names_to = "stat", values_to = "value") %>%
+  ## make value var numeric:
+  mutate(value=as.numeric(value))
+
+## write the function for the lineplot we made before:
+plot.stat <- function(data, player_var, stat_var){
+  ## for testing:
+  # data=df_gamelog_long
+  # player_var="bettsmo"
+  # stat_var="H"
+  
+  require(ggplot2)
+  require(dplyr)
+  require(directlabels)
+  
+  ## filter the data by player and stat vars:
+  plot = data %>%
+    filter(player %in% c(player_var) & stat %in% c(stat_var))
+  
+  ggplot(data=plot, aes(x=gamenum, y=value, color=stat, shape=player)) +
+    geom_point() +
+    geom_line(aes(group=interaction(stat,player))) +
+    theme_bw() + theme(legend.position = "top") +
+    scale_y_continuous(limits = c(0, max(plot$value, na.rm = TRUE))) +
+    labs(x="Game Number", y="Value", color="Stat", shape="Player") +
+    ## directlabels package:
+    directlabels::geom_dl(aes(label=stat), method = list(directlabels::dl.trans(x=x+0.5), "last.points"), cex = 0.8)
+  
+}
+
+## now call the function with my parameters of choice:
+p1 <- plot.stat(data=df_gamelog_long, player_var = c("bettsmo"), stat_var = c("BA", "OBP"))
+
+p2 <- plot.stat(data=df_gamelog_long, player_var = c("ohtansh"), stat_var = c("BA", "OBP"))
+
+p3 <- plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh"), stat_var = c("BA", "OBP"))
+
+p4 <- plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh", "freemfr"), stat_var = c("BA", "OBP"))
+
+
+
+### using grid and gridExtra
+library(grid)
+library(gridExtra)
+
+gridExtra::grid.arrange(p1, p2, p3, p4, ncol=2)
+gridExtra::grid.arrange(p1, p2, p3, p4, ncol=3)
+
+
+### using patchwork
+# install.packages("patchwork")
+# install.packages("ggplot2")
+library(patchwork)
+
+p1 + p2 + p3
+(p1 | p2) / p3
+
+
+### using facet_wrap from ggplot2 for when you want to split a plot by a variable and all have the same legend
+## https://ggplot2.tidyverse.org/reference/facet_wrap.html
+p4 + facet_wrap(vars(player), nrow = 2)
+p4 + facet_wrap(vars(stat))
+
+### use scales = "free" if they have different x or y axis scales:
+## or "free_x", "free_y"
+p5 <- plot.stat(data=df_gamelog_long, player_var = c("bettsmo", "ohtansh", "freemfr"), stat_var = c("BA", "OBP", "H", "PA"))
+
+p5 + facet_wrap(vars(stat), scales="free")
+## bad example, because i forced the y-axis scale in the plot.stat function...
+
+p_messy <- ggplot(data=df_gamelog_long, aes(x=gamenum, y=value, color=stat, shape=player)) +
+    geom_point() +
+    geom_line(aes(group=interaction(stat,player))) +
+    theme_bw() + theme(legend.position = "top") +
+    # scale_y_continuous(limits = c(0, max(plot$value, na.rm = TRUE))) +
+    labs(x="Game Number", y="Value", color="Stat", shape="Player") +
+    ## directlabels package:
+    directlabels::geom_dl(aes(label=stat), method = list(directlabels::dl.trans(x=x+0.5), "last.points"), cex = 0.8)
+
+p_messy + facet_wrap(vars(stat), scales = "free")
+```
+
+## swirl
+
+-   package to learn R?
+
+```{r}
+install.packages("swirl")
+library(swirl)
+
+swirl()
+```
+
+## dashboardBuilder
+
+-   https://github.com/petergandenberger/dashboard-builder
+
+```{r}
+devtools::install_github("https://github.com/petergandenberger/dashboard-builder")
+dashboardBuilder::run_app()
+```
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
