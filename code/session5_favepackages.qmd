@@ -54,19 +54,18 @@ editor_options:
 
 ## R stickers:
 
-+-------------+---------------------+-------------------------------+
-| RPackages   | url                 | notes                         |
-+=============+=====================+===============================+
-|             |                     |                               |
-+-------------+---------------------+-------------------------------+
-|             |                     |                               |
-+-------------+---------------------+-------------------------------+
-|             |                     |                               |
-+-------------+---------------------+-------------------------------+
-|             |                     |                               |
-+-------------+---------------------+-------------------------------+
-|             |                     |                               |
-+-------------+---------------------+-------------------------------+
+| RPackages | url                                                                    | notes                        |
+|-----------|------------------------------------------------------------------------|------------------------------|
+| vetiver   | https://rstudio.github.io/vetiver-r/                                   | oil of tranquility;          |
+| tidyclust | https://tidyclust.tidymodels.org/                                      | comparing clustering methods |
+| headliner | https://cran.r-project.org/web/packages/headliner/vignettes/intro.html |                              |
+| superheat | https://rlbarter.github.io/superheat/                                  | heat maps                    |
+| kmlshape  |                                                                        |                              |
+| emmeans   | https://cran.r-project.org/web/packages/emmeans/index.html             |                              |
+| swdpwr    |                                                                        |                              |
+| usethis   | https://usethis.r-lib.org/                                             |                              |
+|           |                                                                        |                              |
+|           |                                                                        |                              |
 
 ## patchwork / grid / gridExtra
 
